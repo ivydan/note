@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    Begin
+    <div contenteditable="true">
+
+    </div>
+
+    <input id="b" type="button" value="B">
+
+    <script>
+        window.onload = function () {
+            var d = document.getElementById('b');
+            d.onclick = function () {
+                const selection = window.getSelection();
+                console.log(selection)
+                const range = selection.getRangeAt(0); //拖蓝
+                console.log(range)
+                document.execCommand('BackColor', true, 'red')
+            }
+        }
+    </script>
+
+</body>
+
+</html>
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <table border='1' class="tablebox" id='tablebox'>
+        <tr>
+            <td>
+                <input type="button" name="bold" value='Bold' class="bold">
+            </td>
+            <td>
+                <input type="button" name="italic" value='Italic' class="italic">
+            </td>
+            <td>
+                <input type="button" name="underline" value='Underline' class="decotation">
+            </td>
+            <td>size
+                <select name="fontSize" class="font">
+                    <option value="1">1</option>
+                    <option value="3">3</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                </select>
+            </td>
+            <td>img
+                <select name="insertImage">
+                    <option value="">请选择图片</option>
+                    <option value="timg.jpg">timg.jpg</option>
+                    <option value="timg1.jpg">timg1.jpg</option>
+                    <option value="timg2.jpg">timg2.jpg</option>
+                    <option value="timg3.jpg">timg3.jpg</option>
+                    <option value="timg4.jpg">timg4.jpg</option>
+                </select>
+            </td>
+            <td>
+                <input type="button" name="selectAll" value='全选' class="selectAll">
+            </td>
+            <td>
+                <input type="button" name="undo" value='撤销' class="undo">
+            </td>
+            <td>
+                <input type="button" name="justifyLeft" value='left' class="justifyLeft">
+            </td>
+            <td>
+                <input type="button" name="justifyCenter" value='center' class="justifyCenter">
+            </td>
+            <td>
+                <input type="button" name="justifyRight" value='right' class="justifyRight">
+            </td>
+        </tr>
+        <tr>
+            <td colspan='10'>
+                <div class="text" contenteditable="true">这是一个用DIV的contenteditable属性以及document.execCommand实现的一个简易富文本编辑器。</div>
+            </td>
+        </tr>
+    </table>
+    <script>
+        (function () {
+            //富文本编辑器类
+            class Editor {
+
+                constructor() {
+                    this.bindElem();
+                }
+
+
+                bindElem() {
+                    // var text = document.querySelector('.text');
+                    var txt = null;
+                    var tablebox = document.getElementById('tablebox');
+                    var inputbs = tablebox.querySelectorAll('input,select');
+
+                    for (var i = 0; i < inputbs.length; i++) {
+                        if (inputbs[i].tagName.toLowerCase() == 'input') {
+                            this.action(inputbs[i], inputbs[i].name);
+                        } else if (inputbs[i].tagName.toLowerCase() == 'select') {
+                            inputbs[i].onchange = function () {
+                                document.execCommand(this.name, true, this.value);
+                            }
+                        }
+                    }
+                }
+
+
+                action(obj, attr) {
+                    obj.onclick = function () {
+                        document.execCommand(attr, true);
+                    }
+                }
+
+            }
+
+            new Editor();
+
+        })();
+    </script>
+
+</body>
+
+</html> -->
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,minimum-scale=1.0, maximum-scale=1.0,user-scalable=no">
+</head>
+
+<body>
+
+    <p>点击复制后在右边textarea CTRL+V看一下</p>
+    <input type="text" id="inputText" value="测试文本" />
+    <input type="button" id="btn" value="复制" />
+    <textarea rows="4"></textarea>
+    <script type="text/javascript">
+        var btn = document.getElementById('btn');
+        btn.addEventListener('click', function () {
+            // var inputText = document.getElementById('inputText');
+            // var currentFocus = document.activeElement;
+            // inputText.focus();
+            // inputText.setSelectionRange(0, inputText.value.length);
+            document.execCommand('copy', true);
+            // currentFocus.focus();
+        });
+    </script>
+    
+    <div contenteditable id="div"></div>
+    <div style="height:3em;width:100%;background:none;"></div>
+    <div class="fixed">
+        <div id="img"><input type="button" value="上传图片" /></div>
+        <div><a href="#" style="color:#fff;">下一步</a></div>
+    </div>
+
+</body>
+<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.0.js">
+</script> -->
+<!-- <script src="js/src/zepto.js"></script>
+<script src="js/src/event.js"></script>
+<script src="js/src/touch.js"></script>
+<script>
+    (function () {
+        $('#div').css({
+                'min-height': $(window).height() - 106
+            })
+            .blur(function () {
+                var that = this;
+                setTimeout(function () {
+                    $(that).focus();
+                }, 100);
+            });
+        $('#div img').on('doubleTap', function () {
+            $(this).remove();
+        })
+        $("#img").on('click', function () {
+            document.execCommand("insertimage", false, "./111.jpg"); //填写真实图片地址，图片将会插入到编绎模式下的$('#div')中，位置在鼠标光标处
+        })
+    })();
+</script>
+
+</html>
+
+
+<body>
+    <div id="btnGroup">
+        <button id="bold">
+            <bold>加粗</bold>
+        </button>
+        <button id="i"><i>斜体</i></button>
+        <button id="underline"><u>下划线</u></button>
+        <button id="bgcolor" style="background-color: red">背景色</button>
+    </div>
+
+    <p contenteditable="true">我是本来的文字</p>
+
+    <script src="jquery.min.js"></script> 
+    <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <script>
+        // 模拟编辑器 设置文字的背景色 字体等
+        // 需求助于document.execCommand函数.
+        // document.execCommand("backcolor","false","red"); 
+        // 三个参数为：要执行的命令、是否为当前命令提供用户界面、命令相关的值
+
+
+
+
+        //这里用了面向对象  可作练习
+        function Editor(selector) {
+            //jquery对象前加$符号是个好习惯
+            this.$editor = $(selector);
+            //私有函数为它加上下划线_  是在Javascript编程中普遍被遵守的约定
+            this.bindEvents_();
+        }
+        Editor.prototype.bindEvents_ = function () {
+            //真实的编辑器可能有十多个按钮，使用事件代理可提高效率
+            this.$editor.on('click', 'button', function (event) {
+                var id = event.currentTarget.id;
+                switch (id) {
+                    case "bold":
+                        //大多数情况下后面两个参数可省略
+                        document.execCommand('bold');
+                        break;
+                    case "i":
+                        document.execCommand('italic');
+                        break;
+                    case "underline":
+                        document.execCommand('underline');
+                        break;
+                    case "bgcolor":
+                        document.execCommand('backcolor', 'false', 'red');
+                        break;
+                }
+            });
+        }
+        new Editor('#btnGroup'); //初始化编辑器
+    </script>
+
+</body>
+
+</html> -->
