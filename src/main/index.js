@@ -33,44 +33,75 @@ class Main extends Component {
         this.state = {
             data: {},
             currentRenderData: {},  //当前菜单渲染列表
-            backId: 0,              //回退使用ID
+            parentId: "10001",      //回退使用ID
             currentFile: {},        //选中文本
-            currentFileId: "10001", //当前选中项ID
+            currentFileId: "",      //当前选中项ID
             currentFileTitle: "",   //选中文本标题
+            allNoteData: "",        //文本数据
         }
 
         _.bindAll(this,
-            "_handleInsterImage",
             "_handleContextMenuLeft",
-            "_handleBoldText",
-            "_handleChangeTitle",
-            "_handleOnSave",
             "_handleBlurTitle",
-            "_handleCopyText",
-            "_handleOnBlurEditor");
+            "_handleOnSave",
+            "_handleChangeTitle");
 
     }
 
-    componentWillMount() {
-
+    componentDidMount() {
+        const self = this;
+        ipc.on('event-left-list', function (event, list, newAllNoteData) {
+            const { currentFileId, allNoteData, parentId } = self.state;
+            let currentFile = list.children[0];
+            let currentRenderData = list;
+            function searchData(data){
+                if(data.id === parentId){
+                    if(!currentFileId){
+                        currentFile = data.children[0];
+                        currentRenderData = data;
+                    }else{
+                        data.children && data.children.map(v => {
+                            if(v.id === currentFileId){
+                                currentFile = v;
+                                currentRenderData = data;
+                            }
+                        })
+                    }
+                }else{
+                    data.children && data.children.map(v => {
+                        searchData(v);
+                    })
+                }
+            }
+            searchData(list);
+            self.setState({
+                ...self.state,
+                allNoteData: newAllNoteData ? newAllNoteData : allNoteData ,
+                data: list,
+                currentRenderData,
+                currentFile,
+                currentFileTitle: currentFile.title ,
+                currentFileId: currentFile.id
+            })
+        });
     }
 
     // 子列表
-    _handleRenderChildrenList(type, record, backId) {
-        if (type === 1 && record.children.length) {
-            let firstChild = record.children[0];
+    _handleRenderChildrenList(record) {
+        if (record.type === 1) {
+            let firstChild = record.children[0] || {};
             this.setState({
                 currentRenderData: record,
-                backId: backId,
-                currentFileId: firstChild.id || 0,
-                currentFile: firstChild.type === 2 ? firstChild : {},
+                parentId: record.id,
+                currentFile: firstChild,
+                currentFileId: firstChild.id,
                 currentFileTitle: firstChild.title
             })
-        } else if (type === 2) {
+        } else if (record.type === 2) {
             this.setState({
                 currentFile: record,
-                currentFileTitle: record.title,
-                currentFileId: record.id || 0
+                currentFileId: record.id,
+                currentFileTitle: record.title
             })
         }
     }
@@ -86,9 +117,7 @@ class Main extends Component {
             })
             return <div
                 key={"FILETITLE" + v.id}
-                datacode={v.id}
-                datatype={v.type}
-                onClick={this._handleRenderChildrenList.bind(this, v.type, v, id)}
+                onClick={this._handleRenderChildrenList.bind(this, v)}
                 className={fileTitle}
             >
                 <span className="file-icon">{v.type === 1 ? '☁' : '❉'}</span>
@@ -98,98 +127,32 @@ class Main extends Component {
         })
     }
 
-    componentDidMount() {
-        const self = this;
-        ipc.on('event-left-list', function (event, list, newAllNoteData) {
-            console.log(list);
-            const { currentFileId, allNoteData } = self.state;
-            let currentFile = {};
-            let currentRenderData = list;
-            function searchData(data){
-                data.children && data.children.map(v => {
-                    if(v.id === currentFileId){
-                        currentFile = v;
-                        currentRenderData = data;
-                    }else{
-                        searchData(v);
-                    }
-                })
-            }
-            searchData(list);
-            self.setState({
-                ...self.state,
-                allNoteData: newAllNoteData ? newAllNoteData : allNoteData ,
-                data: list,
-                currentRenderData,
-                currentFile,
-                currentFileTitle: currentFile.title
-            })
-        });
-    }
-
     // 返回
-    _handleBack(data, newBackId) {
-        let { backId } = this.state;
-        if (data.id === backId) {
+    _handleBack(data, newBackId, renderData) {
+        let { parentId } = this.state;
+        if (data.id === parentId) {
+            const firstChild = renderData.children[0];
             this.setState({
-                currentRenderData: data,
-                currentFileId: data.children[0] && data.children[0].id || 0,
-                backId: newBackId || 0,
-                currentFile: {}
+                currentRenderData: renderData,
+                currentFile: firstChild,
+                currentFileId: firstChild.id,
+                currentFileTitle: firstChild.title,
+                parentId: newBackId,
             });
             return false;
         } else {
             if (data.children && data.children.length) {
                 data.children.map(v => {
-                    this._handleBack(v, data.id);
+                    this._handleBack(v, data.id, data);
                 })
             }
         }
     }
 
-    _handleInsterImage() {
-        this.restoreRange();
-        document.execCommand('insertImage', true, '/src/main/111.jpg');
-    }
-
-    _handleBoldText() {
-        this.restoreRange();
-        document.execCommand('bold', true);
-    }
-
-    _handleCopyText(e) {
-        this.restoreRange();
-        document.execCommand('copy', true);
-    }
-
-    restoreRange() {
-        if (this.currentSelection) {
-            const selection = window.getSelection();
-            selection.removeAllRanges();
-            const range = document.createRange();
-            range.setStart(this.currentSelection.startContainer, this.currentSelection.startOffset);
-            range.setEnd(this.currentSelection.endContainer, this.currentSelection.endOffset);
-            // 向选区中添加一个区域
-            selection.addRange(range);
-        }
-    }
-
-    _handleOnBlurEditor() {
-        const selection = window.getSelection();
-        const range = selection.getRangeAt(0); //拖蓝
-        this.currentSelection = {
-            "startContainer": range.startContainer,
-            "startOffset": range.startOffset,
-            "endContainer": range.endContainer,
-            "endOffset": range.endOffset
-        }
-    }
-
     // 菜单右键
     _handleContextMenuLeft(event) {
-        debugger;
-        const { currentRenderData, currentFileId } = this.state;
-        ipc.send('left-context-menu', currentRenderData.id === '10001', currentFileId )
+        const { currentRenderData, parentId, currentFileId } = this.state;
+        ipc.send('left-context-menu', currentRenderData.id === '10001', parentId, currentFileId )
     }
 
     //更改文件title
@@ -215,7 +178,7 @@ class Main extends Component {
         return <div className="note-main">
             <div className="content-left">
                 <div className="list-title" >
-                    <span className="back" title="返回上一级" onClick={this._handleBack.bind(this, data)}>←</span>
+                    <span className="back" title="返回上一级" onClick={this._handleBack.bind(this, data, '10001', data)}>←</span>
                     <span className="other" title="添加" onClick={function () {
                         // 告诉主进程在单击示例按钮时显示菜单
                         ipc.send('show-context-menu');

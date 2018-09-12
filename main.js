@@ -130,14 +130,21 @@ function newFolderOrFile(type, lineId){
   changeNewLeftList(ioAddFolder(getMenuListJson(), type, lineId))
 }
 
+function changeFolderTitle(fileId){
+  console.log(fileId)
+}
+
 //上下文菜单
-ipcMain.on('left-context-menu', (event, type, lineId) => {
+ipcMain.on('left-context-menu', (event, type, parentId, fileId) => {
   //! 生成菜单
   const menu = new Menu();
-  menu.append(new MenuItem({ label: '新建文件夹', click: newFolderOrFile.bind(this, type, lineId)}));
+  menu.append(new MenuItem({ label: '新建文件夹', click: newFolderOrFile.bind(this, type, parentId)}));
   if(!type){
     menu.append(new MenuItem({ type: 'separator' }));
-    menu.append(new MenuItem({ label: '新建文件', click: newFolderOrFile.bind(this, type, lineId) }));
+    menu.append(new MenuItem({ label: '新建文件', click: newFolderOrFile.bind(this, type, parentId) }));
+  }else{
+    menu.append(new MenuItem({ type: 'separator' }));
+    menu.append(new MenuItem({ label: '重命名', click: changeFolderTitle.bind(this, fileId)}));
   }
   const win = BrowserWindow.fromWebContents(event.sender);
   menu.popup(win);

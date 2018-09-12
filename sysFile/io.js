@@ -1,20 +1,20 @@
 const fs = require('fs');
 
-function resetData(data, type, lineId) {
+function resetData(data, type, parentId) {
     const randomData = new Date();
-    data.children && data.children.map(v => {
-        if (v.id === lineId) {
-            data.children.push({
-                "title": type ? `new folder ${randomData.getMonth()}` : `new file ${randomData.getMonth()}`,
-                "id": randomData.getTime(),
-                "type": type ? 1 : 2,
-                "dateStr": randomData.getMonth() + '-' + randomData.getDate(),
-                "children": []
-            })
-        } else {
-            resetData(v, type, lineId);
-        }
-    });
+    if(data.id === parentId){
+        data.children.push({
+            "title": type ? `new folder ${randomData.getMonth()}` : `new file ${randomData.getMonth()}`,
+            "id": randomData.getTime(),
+            "type": type ? 1 : 2,
+            "dateStr": randomData.getMonth() + '-' + randomData.getDate(),
+            "children": []
+        })
+    }else{
+        data.children && data.children.map(v => {
+            resetData(v, type, parentId)
+        })
+    }
 }
 
 module.exports = {
